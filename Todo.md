@@ -1,3 +1,4 @@
 - Concurrent Safe ?
 - Go Concurrency Patterns: A Deep Dive
 - go test -race .
+- To fix this, you could use a mutex to control concurrent access to b. 
