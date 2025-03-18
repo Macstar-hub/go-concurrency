@@ -27,42 +27,42 @@ func main() {
 
 	startTime := time.Now()
 
-	responseChannel := make(chan int, 2048)
+	responseChannel := make(chan int, 1024)
 	wg := &sync.WaitGroup{}
 
 	// usdPrice :=
-	go httpGetUSD("https://www.tgju.org/profile/price_dollar_rl", "priceGold", responseChannel, wg)
 	wg.Add(1)
+	go httpGetUSD("https://www.tgju.org/profile/price_dollar_rl", "priceGold", responseChannel, wg)
 
 	// // sekkeTamamPrice :=
+	wg.Add(1)
 	go httpGetFullCoin("https://www.tgju.org/profile/sekee", "priceGold", responseChannel, wg)
 	// // price.SekkeTamam = sekkeTamamPrice
-	wg.Add(1)
 
 	// // sekkeGhadimPrice :=
+	wg.Add(1)
 	go httpGetOldCoin("https://www.tgju.org/profile/sekeb", "priceGold", responseChannel, wg)
 	// // price.SekketGhadim = sekkeGhadimPrice
-	wg.Add(1)
 
 	// // SekkehNimPrice :=
+	wg.Add(1)
 	go httpGetSemiCoin("https://www.tgju.org/profile/nim", "priceGold", responseChannel, wg)
 	// // price.SekkehNim = SekkehNimPrice
-	wg.Add(1)
 
 	// // SekkehRobePrice :=
+	wg.Add(1)
 	go httpGetQuarterGold("https://www.tgju.org/profile/rob", "priceGold", responseChannel, wg)
 	// // price.RobeSekke = SekkehRobePrice
-	wg.Add(1)
 
 	// // Gold18 :=
+	wg.Add(1)
 	go httpGet18New("https://www.tgju.org/profile/geram18", "priceGold", responseChannel, wg)
 	// // price.Gold18 = Gold18
-	wg.Add(1)
 
 	// // GoldDast2 :=
+	wg.Add(1)
 	go httpGet18Old("https://www.tgju.org/profile/gold_mini_size", "priceGold", responseChannel, wg)
 	// // price.GoldDast2 = GoldDast2
-	wg.Add(1)
 
 	wg.Wait()
 	close(responseChannel)
@@ -98,6 +98,7 @@ func httpGetUSD(url string, priceType string, responceChannel chan int, wg *sync
 
 	responceChannel <- price
 	wg.Done()
+	// close(responceChannel)
 
 }
 
@@ -123,6 +124,7 @@ func httpGetFullCoin(url string, priceType string, responceChannel chan int, wg 
 
 	responceChannel <- price
 	wg.Done()
+	// close(responceChannel)
 
 }
 
