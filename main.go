@@ -40,7 +40,7 @@ func maskanCalculation(price int, responseChannle chan int, wg *sync.WaitGroup) 
 	time.Sleep(1 * time.Second)
 	fmt.Println(price)
 
-	responseChannle <- <-responseChannle
+	responseChannle <- price
 
 	/*
 	 Note:

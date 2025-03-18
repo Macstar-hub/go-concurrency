@@ -1,1 +1,3 @@
-Concurrent Safe ?
+- Concurrent Safe ?
+- Go Concurrency Patterns: A Deep Dive
+- go test -race .
