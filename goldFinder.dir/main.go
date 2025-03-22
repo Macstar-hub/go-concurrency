@@ -30,39 +30,26 @@ func main() {
 	responseChannel := make(chan Price, 1024)
 	wg := &sync.WaitGroup{}
 
-	// usdPrice :=
 	wg.Add(1)
 	go p.httpGetUSD("https://www.tgju.org/profile/price_dollar_rl", "priceGold", responseChannel, wg)
 
-	// // sekkeTamamPrice :=
 	wg.Add(1)
 	go p.httpGetFullCoin("https://www.tgju.org/profile/sekee", "priceGold", responseChannel, wg)
-	// // price.SekkeTamam = sekkeTamamPrice
 
-	// // // sekkeGhadimPrice :=
 	wg.Add(1)
 	go p.httpGetOldCoin("https://www.tgju.org/profile/sekeb", "priceGold", responseChannel, wg)
-	// // // price.SekketGhadim = sekkeGhadimPrice
 
-	// // // SekkehNimPrice :=
 	wg.Add(1)
 	go p.httpGetSemiCoin("https://www.tgju.org/profile/nim", "priceGold", responseChannel, wg)
-	// // // price.SekkehNim = SekkehNimPrice
 
-	// // // SekkehRobePrice :=
 	wg.Add(1)
 	go p.httpGetQuarterGold("https://www.tgju.org/profile/rob", "priceGold", responseChannel, wg)
-	// // // price.RobeSekke = SekkehRobePrice
 
-	// // // Gold18 :=
 	wg.Add(1)
 	go p.httpGet18New("https://www.tgju.org/profile/geram18", "priceGold", responseChannel, wg)
-	// // // price.Gold18 = Gold18
 
-	// // // GoldDast2 :=
 	wg.Add(1)
 	go p.httpGet18Old("https://www.tgju.org/profile/gold_mini_size", "priceGold", responseChannel, wg)
-	// // // price.GoldDast2 = GoldDast2
 
 	wg.Wait()
 	close(responseChannel)
