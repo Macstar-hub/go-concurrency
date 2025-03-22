@@ -26,57 +26,63 @@ type Price struct {
 func main() {
 
 	startTime := time.Now()
-
-	responseChannel := make(chan int, 1024)
+	p := new(Price)
+	responseChannel := make(chan Price, 1024)
 	wg := &sync.WaitGroup{}
 
 	// usdPrice :=
 	wg.Add(1)
-	go httpGetUSD("https://www.tgju.org/profile/price_dollar_rl", "priceGold", responseChannel, wg)
+	go p.httpGetUSD("https://www.tgju.org/profile/price_dollar_rl", "priceGold", responseChannel, wg)
 
 	// // sekkeTamamPrice :=
 	wg.Add(1)
-	go httpGetFullCoin("https://www.tgju.org/profile/sekee", "priceGold", responseChannel, wg)
+	go p.httpGetFullCoin("https://www.tgju.org/profile/sekee", "priceGold", responseChannel, wg)
 	// // price.SekkeTamam = sekkeTamamPrice
 
-	// // sekkeGhadimPrice :=
+	// // // sekkeGhadimPrice :=
 	wg.Add(1)
-	go httpGetOldCoin("https://www.tgju.org/profile/sekeb", "priceGold", responseChannel, wg)
-	// // price.SekketGhadim = sekkeGhadimPrice
+	go p.httpGetOldCoin("https://www.tgju.org/profile/sekeb", "priceGold", responseChannel, wg)
+	// // // price.SekketGhadim = sekkeGhadimPrice
 
-	// // SekkehNimPrice :=
+	// // // SekkehNimPrice :=
 	wg.Add(1)
-	go httpGetSemiCoin("https://www.tgju.org/profile/nim", "priceGold", responseChannel, wg)
-	// // price.SekkehNim = SekkehNimPrice
+	go p.httpGetSemiCoin("https://www.tgju.org/profile/nim", "priceGold", responseChannel, wg)
+	// // // price.SekkehNim = SekkehNimPrice
 
-	// // SekkehRobePrice :=
+	// // // SekkehRobePrice :=
 	wg.Add(1)
-	go httpGetQuarterGold("https://www.tgju.org/profile/rob", "priceGold", responseChannel, wg)
-	// // price.RobeSekke = SekkehRobePrice
+	go p.httpGetQuarterGold("https://www.tgju.org/profile/rob", "priceGold", responseChannel, wg)
+	// // // price.RobeSekke = SekkehRobePrice
 
-	// // Gold18 :=
+	// // // Gold18 :=
 	wg.Add(1)
-	go httpGet18New("https://www.tgju.org/profile/geram18", "priceGold", responseChannel, wg)
-	// // price.Gold18 = Gold18
+	go p.httpGet18New("https://www.tgju.org/profile/geram18", "priceGold", responseChannel, wg)
+	// // // price.Gold18 = Gold18
 
-	// // GoldDast2 :=
+	// // // GoldDast2 :=
 	wg.Add(1)
-	go httpGet18Old("https://www.tgju.org/profile/gold_mini_size", "priceGold", responseChannel, wg)
-	// // price.GoldDast2 = GoldDast2
+	go p.httpGet18Old("https://www.tgju.org/profile/gold_mini_size", "priceGold", responseChannel, wg)
+	// // // price.GoldDast2 = GoldDast2
 
 	wg.Wait()
 	close(responseChannel)
-
+	finalPrice := new(Price)
 	for responseChann := range responseChannel {
-		fmt.Println(responseChann)
+		finalPrice.Dollar = responseChann.Dollar + finalPrice.Dollar
+		finalPrice.SekkeTamam = responseChann.SekkeTamam + finalPrice.SekkeTamam
+		finalPrice.SekketGhadim = responseChann.SekketGhadim + finalPrice.SekketGhadim
+		finalPrice.SekkehNim = responseChann.SekkehNim + finalPrice.SekkehNim
+		finalPrice.RobeSekke = responseChann.RobeSekke + finalPrice.RobeSekke
+		finalPrice.Gold18 = responseChann.Gold18 + finalPrice.Gold18
+		finalPrice.GoldDast2 = responseChann.GoldDast2 + finalPrice.GoldDast2
 	}
 
-	// fmt.Println(price)
+	log.Println("From channel is: ", finalPrice)
 	log.Println("Total latency: ", time.Since(startTime))
 
 }
 
-func httpGetUSD(url string, priceType string, responceChannel chan int, wg *sync.WaitGroup) {
+func (p Price) httpGetUSD(url string, priceType string, responceChannel chan Price, wg *sync.WaitGroup) {
 	var price int
 
 	netClient := customHttpClient()
@@ -96,64 +102,14 @@ func httpGetUSD(url string, priceType string, responceChannel chan int, wg *sync
 
 	responseByte.Body.Close()
 
-	responceChannel <- price
-	wg.Done()
-	// close(responceChannel)
+	p.Dollar = price
 
-}
-
-func httpGetFullCoin(url string, priceType string, responceChannel chan int, wg *sync.WaitGroup) {
-	var price int
-
-	netClient := customHttpClient()
-
-	responseByte, err := netClient.Get(url)
-
-	httpErrorHandeler(err)
-
-	responeBody, err := ioutil.ReadAll(responseByte.Body)
-	byteReadErrorHandelete(err)
-
-	responseString := string(responeBody)
-
-	if priceType == "priceGold" {
-		_, price = findSekkeTamam(responseString)
-	}
-
-	responseByte.Body.Close()
-
-	responceChannel <- price
-	wg.Done()
-	// close(responceChannel)
-
-}
-
-func httpGetOldCoin(url string, priceType string, responceChannel chan int, wg *sync.WaitGroup) {
-	var price int
-
-	netClient := customHttpClient()
-
-	responseByte, err := netClient.Get(url)
-
-	httpErrorHandeler(err)
-
-	responeBody, err := ioutil.ReadAll(responseByte.Body)
-	byteReadErrorHandelete(err)
-
-	responseString := string(responeBody)
-
-	if priceType == "priceGold" {
-		_, price = findSekkeTamam(responseString)
-	}
-
-	responseByte.Body.Close()
-
-	responceChannel <- price
+	responceChannel <- p
 	wg.Done()
 
 }
 
-func httpGetSemiCoin(url string, priceType string, responceChannel chan int, wg *sync.WaitGroup) {
+func (p Price) httpGetFullCoin(url string, priceType string, responceChannel chan Price, wg *sync.WaitGroup) {
 	var price int
 
 	netClient := customHttpClient()
@@ -173,12 +129,14 @@ func httpGetSemiCoin(url string, priceType string, responceChannel chan int, wg 
 
 	responseByte.Body.Close()
 
-	responceChannel <- price
+	p.SekkeTamam = price
+
+	responceChannel <- p
 	wg.Done()
 
 }
 
-func httpGetQuarterGold(url string, priceType string, responceChannel chan int, wg *sync.WaitGroup) {
+func (p Price) httpGetOldCoin(url string, priceType string, responceChannel chan Price, wg *sync.WaitGroup) {
 	var price int
 
 	netClient := customHttpClient()
@@ -198,12 +156,14 @@ func httpGetQuarterGold(url string, priceType string, responceChannel chan int, 
 
 	responseByte.Body.Close()
 
-	responceChannel <- price
+	p.SekketGhadim = price
+
+	responceChannel <- p
 	wg.Done()
 
 }
 
-func httpGet18New(url string, priceType string, responceChannel chan int, wg *sync.WaitGroup) {
+func (p Price) httpGetSemiCoin(url string, priceType string, responceChannel chan Price, wg *sync.WaitGroup) {
 	var price int
 
 	netClient := customHttpClient()
@@ -223,12 +183,14 @@ func httpGet18New(url string, priceType string, responceChannel chan int, wg *sy
 
 	responseByte.Body.Close()
 
-	responceChannel <- price
+	p.SekkehNim = price
+
+	responceChannel <- p
 	wg.Done()
 
 }
 
-func httpGet18Old(url string, priceType string, responceChannel chan int, wg *sync.WaitGroup) {
+func (p Price) httpGetQuarterGold(url string, priceType string, responceChannel chan Price, wg *sync.WaitGroup) {
 	var price int
 
 	netClient := customHttpClient()
@@ -248,7 +210,63 @@ func httpGet18Old(url string, priceType string, responceChannel chan int, wg *sy
 
 	responseByte.Body.Close()
 
-	responceChannel <- price
+	p.RobeSekke = price
+
+	responceChannel <- p
+	wg.Done()
+
+}
+
+func (p Price) httpGet18New(url string, priceType string, responceChannel chan Price, wg *sync.WaitGroup) {
+	var price int
+
+	netClient := customHttpClient()
+
+	responseByte, err := netClient.Get(url)
+
+	httpErrorHandeler(err)
+
+	responeBody, err := ioutil.ReadAll(responseByte.Body)
+	byteReadErrorHandelete(err)
+
+	responseString := string(responeBody)
+
+	if priceType == "priceGold" {
+		_, price = findSekkeTamam(responseString)
+	}
+
+	responseByte.Body.Close()
+
+	p.Gold18 = price
+
+	responceChannel <- p
+	wg.Done()
+
+}
+
+func (p Price) httpGet18Old(url string, priceType string, responceChannel chan Price, wg *sync.WaitGroup) {
+	var price int
+
+	netClient := customHttpClient()
+
+	responseByte, err := netClient.Get(url)
+
+	httpErrorHandeler(err)
+
+	responeBody, err := ioutil.ReadAll(responseByte.Body)
+	byteReadErrorHandelete(err)
+
+	responseString := string(responeBody)
+
+	if priceType == "priceGold" {
+		_, price = findSekkeTamam(responseString)
+	}
+
+	responseByte.Body.Close()
+
+	p.GoldDast2 = price
+
+	responceChannel <- p
 	wg.Done()
 
 }
@@ -304,6 +322,9 @@ func priceCleaner(priceString string) int {
 
 	// Make int format.
 	price, _ := strconv.Atoi(priceInString)
-	fmt.Println(price)
+
+	// Enable just for debug:
+	// fmt.Println(price)
+
 	return price
 }
